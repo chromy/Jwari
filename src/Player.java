@@ -1,7 +1,20 @@
 
-public class Player {
+public class Player implements Cloneable {
 	
-	private int score = 0;
+	private int score;
+	
+	public Player(int score) {
+		this.score = score;
+	}
+	
+	public Player clone() {
+		try {
+			return (Player)super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 	public int getScore() {
 		return score;

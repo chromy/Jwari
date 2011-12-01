@@ -1,12 +1,12 @@
 
-public class Game {
+public class Game implements Cloneable {
 	private int currentplayerId = 0;
 	public Player[] players;
-	private final Bowl[] bowles;
+	private Bowl[] bowles;
 	private int halfway;
 	
 	public Game() {
-		players = new Player[] {new Player(), new Player()};
+		players = new Player[] {new Player(0), new Player(0)};
 		bowles = new Bowl[12];
 		halfway = (int)(bowles.length/2);
 		for (int i=0; i<bowles.length; i++) {
@@ -15,8 +15,34 @@ public class Game {
 		
 	}
 	
+	public Game clone() {
+		try {
+			Game copy = (Game)super.clone();
+			copy.players = players.clone();
+			for (int i=0; i<players.length; i++) {
+				copy.players[i] = players[i].clone();
+			}
+			copy.bowles = bowles.clone();
+			for (int i=0; i<bowles.length; i++) {
+				copy.bowles[i] = bowles[i].clone();
+			}
+
+			return copy;
+			
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	public int getCurrentPlayerId() {
 		return currentplayerId;
+	}
+	
+	public Player getPlayer(int playerId) {
+		assert (playerId==0 || playerId==1) : "Player Id should be 0 or 1.";
+		return players[playerId];
+		
 	}
 	
 	public void swapPlayers() {
@@ -64,7 +90,13 @@ public class Game {
 		swapPlayers();
 	}
 	
-	
+	public Game afterMove(int bowl) {
+		assert (isValidMove(bowl)) : "Move must be valid. Move was: " + bowl;
+		Game copy = this.clone();
+		copy.move(bowl);
+		return copy;
+		
+	}
 	
 	private void updateBowles() {
 		int cp = getCurrentPlayerId();

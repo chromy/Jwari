@@ -1,7 +1,7 @@
 import java.util.Random;
 
 public class RandomAI extends Mover {
-	public static String movertype = "Random";
+	private static String movertype = "Random";
 	  
 	private final Random random;
 

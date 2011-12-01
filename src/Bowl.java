@@ -1,10 +1,19 @@
 
-public class Bowl {
+public class Bowl implements Cloneable {
 	private int stones;
-	private int deposited = 0; 
+	private int deposited = 0;
 	
 	public Bowl(int stones) {
 		this.stones = stones;
+	}
+	
+	public Bowl clone() {
+		try {
+			return (Bowl)super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	public int getStones() {

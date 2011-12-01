@@ -1,6 +1,6 @@
 
 public class Human extends Mover {
-	public static String movertype = "Human";
+	private static String movertype = "Human";
 	  
 	public int getMove(Game game, String name) {
 		System.out.println(name + ": Please enter your move.");

@@ -12,11 +12,11 @@ public class OwariTestSuite {
 	    
 	  public static void playerTests() {
 		  ArrayList<String> actions = new ArrayList<String>();
-		  Player p1 = new Player();
+		  Player p1 = new Player(0);
 		  testPlayer(actions, "Made p1", p1, 0);
 		  p1.addToScore(5);
 		  testPlayer(actions, "Add 5 to p1 score", p1, 5);
-		  Player p2 = new Player();
+		  Player p2 = new Player(0);
 		  testPlayer(actions, "Made p2", p2, 0);
 		  p2.addToScore(3);
 		  testPlayer(actions, "Add 3 to p2 score", p2, 3);
