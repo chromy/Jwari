@@ -35,8 +35,13 @@ public class TestMover {
 				
 				timebefore = System.currentTimeMillis();
 				int move = players[cp].getMove(game, names[cp]);
-				times[game.getCurrentPlayerId()] += System.currentTimeMillis() - timebefore; 
-				assert (game.isValidMove(move)) : "Move not valid. Move was: " + move + " Player was: " + names[cp];
+				times[game.getCurrentPlayerId()] += System.currentTimeMillis() - timebefore;
+				if (!game.isValidMove(move)) {
+					System.out.println("Move not valid. Move was: " + move + " Player was: " + names[cp]);
+					game.display();
+					break;
+				}
+				//assert (game.isValidMove(move)) : "Move not valid. Move was: " + move + " Player was: " + names[cp];
 				game.move(move);
 				//game = game.afterMove(move);
 			}

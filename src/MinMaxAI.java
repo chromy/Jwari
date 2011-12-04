@@ -19,8 +19,7 @@ public class MinMaxAI extends Mover {
 	
 	// Wikipedia & Computer Gamesmanship
 	/**
-	 * Recursive implementation of the minmax algorithm. Because we do the first
-	 * level by hand in getMove all the values are inverted.  
+	 * Recursive implementation of the minmax algorithm.  
 	 */
 	private ScorePair minmax(Game game, int depth) {
 		if (depth <= 0 || game.isOver()) {

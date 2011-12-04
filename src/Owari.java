@@ -50,6 +50,7 @@ public class Owari {
 		System.out.println("3. LookAheadOne");
 		System.out.println("4. MinMax");
 		System.out.println("5. AlphaBeta");
+		System.out.println("6. HexAI");
 		int selection = IOUtil.readInt();
 		switch (selection) {
 			case 1:
@@ -57,7 +58,7 @@ public class Owari {
 				return new Human();
 			case 2:
 				System.out.println("You selected RandomAI.");
-				return new RandomAI(new Random());
+				return new RandomAI(new Random(1));
 			case 3:
 				System.out.println("You selected LookAheadOneAI.");
 				return new LookOneAI();
@@ -67,6 +68,9 @@ public class Owari {
 			case 5:
 				System.out.println("You selected AlphaBetaAI.");
 				return new AlphaBetaAI();
+			case 6:
+				System.out.println("You selected HexAI.");
+				return new HexAI();
 			default:
 				System.out.println("Selection not valid - default to Human.");
 				return new Human();

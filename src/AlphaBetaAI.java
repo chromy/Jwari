@@ -2,25 +2,24 @@
 public class AlphaBetaAI extends Mover {
 	public static String movertype = "AlphaBetaAI";
 	private int playerId;
-	private int depth = 15;
+	private int depth = 12;
 	private int[] killermoves;
 
 	@Override
 	public int getMove(Game game, String name) {
 		playerId = game.getCurrentPlayerId();
 		//ScorePair score = alphabeta(game, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
-		killermoves = new int[depth];
-		for (int i=0; i<depth; i++) {
-			killermoves[i] = -1;
-		}
+		//killermoves = new int[depth];
+		//for (int i=0; i<depth; i++) {
+		//	killermoves[i] = -1;
+		//}
 		ScorePair score = alphabeta(game, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
 		return score.getMove();
 	}
 	
 	// Wikipedia & Computer Gamesmanship
 	/**
-	 * Recursive implementation of the alphabeta algorithm. Because we do the 
-	 * first level by hand in getMove all the values are inverted.  
+	 * Recursive implementation of the alphabeta algorithm. 
 	 */
 	private ScorePair alphabeta(Game game, int depth, int alpha, int beta, boolean maxplayer) {
 		if (depth <= 0 || game.isOver()) {
@@ -36,8 +35,8 @@ public class AlphaBetaAI extends Mover {
 			return new ScorePair(-1, alphabeta(copy_game, depth-1, alpha, beta, !maxplayer).getScore());
 		}
 		if (maxplayer) {
-			
-			int kmove = killermoves[depth-1];
+			int kmove = -1;
+			/*int kmove = killermoves[depth-1];
 			if (kmove >= 0 && game.isValidMove(kmove)) {
 	    		score = alphabeta(game.afterMove(kmove), depth-1, alpha, beta, !maxplayer).getScore();
 	    		if (alpha < score) {
@@ -45,7 +44,7 @@ public class AlphaBetaAI extends Mover {
 	    			bestmove = kmove;
 	    		}
 			}
-			
+			*/
 			
 		    for (int move : game.allValidMoves()) {
 		    	if (move >= 0 && move != kmove) {
@@ -55,14 +54,15 @@ public class AlphaBetaAI extends Mover {
 		    			bestmove = move;
 		    		}
 		    		if (beta<=alpha) {
-		    			killermoves[depth-1] = move;
+		    			//killermoves[depth-1] = move;
 		    			break;
 		    		}
 		    	}
 		    }
 		    return new ScorePair(bestmove, alpha);
 		} else {
-			int kmove = killermoves[depth-1];
+			int kmove = -1;
+			/*int kmove = killermoves[depth-1];
 			if (kmove >= 0 && game.isValidMove(kmove)) {
 	    		score = alphabeta(game.afterMove(kmove), depth-1, alpha, beta, !maxplayer).getScore();
 	    		if (beta > score) {
@@ -70,7 +70,7 @@ public class AlphaBetaAI extends Mover {
 	    			bestmove = kmove;
 	    		}
 			}
-			
+			*/
 			
 		    for (int move : game.allValidMoves()) {
 		    	if (move >= 0 && move != kmove) {
@@ -80,7 +80,7 @@ public class AlphaBetaAI extends Mover {
 		    			bestmove = move;
 		    		}
 		    		if (beta<=alpha) {
-		    			killermoves[depth-1] = move;
+		    			//killermoves[depth-1] = move;
 		    			break;
 		    		}
 		    	}
@@ -128,7 +128,7 @@ public class AlphaBetaAI extends Mover {
 		}
 		int s1 = game.getPlayer(currentplayer).getScore();
 		int s2 = game.getPlayer((currentplayer+1)%2).getScore();
-		return s1 - s2; 
+		return 100 + s1 - s2; 
 	}
 	
 	@Override
