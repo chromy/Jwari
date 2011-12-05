@@ -49,7 +49,7 @@ public class AlphaBetaAI extends Mover {
 		    for (int move : game.allValidMoves()) {
 		    	if (move >= 0 && move != kmove) {
 		    		score = alphabeta(game.afterMove(move), depth-1, alpha, beta, !maxplayer).getScore();
-		    		if (alpha < score) {
+		    		if (alpha <= score) {
 		    			alpha = score;
 		    			bestmove = move;
 		    		}

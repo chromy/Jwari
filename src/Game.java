@@ -8,7 +8,7 @@ public class Game implements Cloneable {
 	private int halfway = (int)(numberofbowls/2); 
 	private int currentplayerId = 0;
 	private Player[] players;
-	private Bowl[] bowls;
+	public Bowl[] bowls;
 	
 	
 	
@@ -23,7 +23,6 @@ public class Game implements Cloneable {
 		}
 		
 	}
-	
 	
 	/**
 	 * Testing constructor - let call give us our members.

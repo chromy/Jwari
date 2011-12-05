@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Random;
 
 public class Owari {
@@ -23,9 +24,11 @@ public class Owari {
 			
 			int move = players[cp].getMove(game, names[cp]);
 			assert (game.isValidMove(move)) : "Move not valid. Move was: " + move + " Player was: " + names[cp];
+			
 			game.move(move);
 			//game = game.afterMove(move);
 			System.out.println(names[cp] + " made the move: " + (move+1));
+			pressAnyKey();
 			
 		}
 		
@@ -74,6 +77,15 @@ public class Owari {
 			default:
 				System.out.println("Selection not valid - default to Human.");
 				return new Human();
+		}
+	}
+	
+	public static void pressAnyKey() {
+		System.out.println("[Press any key.]");
+		try {
+			System.in.read();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
