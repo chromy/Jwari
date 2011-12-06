@@ -1,5 +1,5 @@
 /**
- * Implements the game  
+ * Implements the game state object.
  * @author hjd11
  *
  */
@@ -13,7 +13,7 @@ public class Game implements Cloneable {
 	
 	
 	/**
-	 * Default constructor - make all our members our self.
+	 * Default constructor - make all our members by our self.
 	 */
 	public Game() {
 		players = new Player[] {new Player(0), new Player(0)};
