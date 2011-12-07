@@ -10,7 +10,9 @@ public class GameTest extends TestCase {
 	}
 
 	public void testClone() {
-		fail("Not yet implemented");
+		Game g = new Game();
+		Game c = g.clone();
+		c.display();
 	}
 
 	public void testSwapPlayers() {
@@ -49,7 +51,14 @@ public class GameTest extends TestCase {
 	}
 
 	public void testMove() {
-		fail("Not yet implemented");
+		Bowl[] b = {new Bowl(0), new Bowl(6), new Bowl(0), new Bowl(7), new Bowl(6), new Bowl(5), new Bowl(5), new Bowl(5), new Bowl(6), new Bowl(5), new Bowl(5), new Bowl(1)};
+		Game g = new Game(new Player(), new Player(), b);
+		g.swapPlayers();
+		g.display();
+		g.move(7);
+		g.display();
+		g.move(0);
+		g.display();
 	}
 
 	public void testAfterMove() {

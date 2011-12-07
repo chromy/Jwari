@@ -1,61 +1,59 @@
 import java.util.Arrays;
 
-/*
-long t1 = System.currentTimeMillis();
-score = alphabeta(game, new int[this.depth], PV, 0, depth, MIN_VALUE, MAX_VALUE, 1);
-long t2 = System.currentTimeMillis();
-
-System.out.println("Nodes searched: " + nodesSearched);
-System.out.println("Nodes evaluated: " + nodesEval);
-System.out.println((100*nodesTerm/(float)nodesEval) + "% where final.");
-System.out.println("Current score: " + evaluation(game, playerId));
-System.out.println("Final score: " + score);
-System.out.println("PV: " + java.util.Arrays.toString(PV));
-System.out.println("PV Scores: " + java.util.Arrays.toString(PV_SCORES));
-nodesSearched = 0;
-nodesEval = 0;
-nodesTerm = 0;
-*/
 
 public class HexAI extends Mover {
 	public static String movertype = "HexAI";
+	
+	// Stats.
 	private int playerId;
 	private int nodesSearched = 0;
 	private int nodesEval = 0;
 	private int nodesTerm = 0;
-	private int maxDepth = 40;
-	private int[] PV = new int[maxDepth];
-	private int[][] PVTemps;
-	private int[] PV_SCORES = new int[maxDepth];
+	private int depthReached = 0;
+	
+	
+	private final int maxDepth = 6;
+	private int[] PV;
+	private int[][] PVTri = makeTriArray(maxDepth+1);
+	
 	// Moral of the day; -Integer.MIN_VALUE != Integer.MAX_VALUE *cry*
 	private static int MIN_VALUE = -100000;
 	private static int MAX_VALUE = 100000;
-	private final long timeBudget = 20*1000;
+	// Time for each move (in ms).
+	private final long timeBudget = 5*1000;
+	// True iff we'ver proved we can force a win.
 	private boolean forcewin = false;
 	
-	
-	public HexAI(){
-		PVTemps = makeTriArray(maxDepth);
-	}
 	
 	@Override
 	public String getType() {
 		return movertype;
 	}
 	
+	/**
+	 * 
+	 */
 	@Override
-	public int getMove(Game game, String name) {
+	public int getMove(Game game, int opponentMove, String name) {
 		playerId = game.getCurrentPlayerId();
+		int opponentMoveGuess = PVTri[0][1];
+		int depthReachedLastTurn = depthReached;
+		PVTri[0] = Arrays.copyOf(PVTri[2], maxDepth);
 		long finishTime = System.currentTimeMillis() + timeBudget;
-		clearStats();
+		clearStats(); 
 		int score = 0;
 		
 		
 		if (!forcewin) {
 			long t3 = System.currentTimeMillis();
-			score = IDalphabeta(game, PVTemps, finishTime);
+			//if (opponentMoveGuess == opponentMove) {
+			//	score = IDalphabeta(game, PVTri, Math.max(depthReachedLastTurn-2, 0), finishTime);
+			//} else {
+			//	score = IDalphabeta(game, PVTri, 4, finishTime);
+			//}
+			score = IDalphabeta(game, PVTri, maxDepth, finishTime);
 			long t4 = System.currentTimeMillis();
-			PV = PVTemps[0];
+			PV = PVTri[0];
 			
 			System.out.println("IDAB took: " + (t4-t3));
 			System.out.println("Time remaining in budget: " 
@@ -63,7 +61,8 @@ public class HexAI extends Mover {
 			printStats(evaluation(game, playerId), score);
 			
 		} else {
-			//score = alphabeta(game, PV, 0, 10, MIN_VALUE, MAX_VALUE, 1);
+			score = exhaustSearch(game, PVTri, 10, 1);
+			PV = PVTri[0];
 		}
 		
 		if (score == MIN_VALUE || score == MAX_VALUE) {
@@ -74,7 +73,7 @@ public class HexAI extends Mover {
 			}
 			
 			long t1 = System.currentTimeMillis();
-			score = exhaustSearch(game, 10, 1);
+			score = exhaustSearch(game, PVTri, 10, 1);
 			long t2 = System.currentTimeMillis();
 			
 			switch (score) {
@@ -95,20 +94,27 @@ public class HexAI extends Mover {
 
 		System.out.println("---------------------------------");
 
-		//assert (bestmove >= 0) : "getMove returned an invalid move.";
 
+
+		Game afterPV = game.moveSequence(Arrays.copyOf(PV, Math.max(0, depthReached)));
+		System.out.println("------------AFTER_PV-------------");
+		afterPV.display();
+		System.out.println("---------------------------------");
+		
+		//assert (bestmove >= 0) : "getMove returned an invalid move.";
 		return PV[0];
 	}
 	
 	private int[][] makeTriArray(int size) {
 		int[][] triarray = new int[size][];
-		for (int i=0; i<size; size++) {
-			triarray[i] = new int[size-i];
+		for (int i=0; i<size; i++) {
+			triarray[i] = new int[size-i-1];
 		}
 		return triarray;
 	}
 	
 	private void clearStats() {
+		depthReached = 0;
 		nodesSearched = 0;
 		nodesEval = 0;
 		nodesTerm = 0;
@@ -118,30 +124,25 @@ public class HexAI extends Mover {
 		System.out.println("Nodes searched: " + nodesSearched);
 		System.out.println("Nodes evaluated: " + nodesEval);
 		System.out.println((100*nodesTerm/(float)nodesEval) + "% where final.");
-		System.out.println("Current score: " + currentscore);
-		System.out.println("Final score: " + finalscore);
+		System.out.println("Current score: " + (currentscore-100));
+		System.out.println("Final score: " + (finalscore-100));
 		System.out.println("PV: " + java.util.Arrays.toString(PV));
-		System.out.println("PV Scores: " + java.util.Arrays.toString(PV_SCORES));
+		//System.out.println("PV Scores: " + java.util.Arrays.toString(PV_SCORES));
 	}
 	
 	
 	// iterative deepening
-	private int IDalphabeta(Game game, int[][] principleVar, long finishTime) {
-		int depth = 0;
-		int score = 0;
+	private int IDalphabeta(Game game, int[][] principleVar, int depth, long finishTime) {
+		depthReached = depth;
+		int score = alphabeta(game, principleVar, 0, depth, MIN_VALUE, MAX_VALUE, 1);
 		
-		//int[] bestsofar = Arrays.copyOf(principleVar, principleVar.length); //Pain...
-		while (finishTime > System.currentTimeMillis() && maxDepth > depth) {
-			score = alphabeta(game, principleVar, 0, depth, MIN_VALUE, MAX_VALUE, 1);
-			//bestsofar = Arrays.copyOf(result, Math.max(bestsofar.length, depth));
-			depth++;
+		if (finishTime > System.currentTimeMillis() && maxDepth > depth) {
+			return IDalphabeta(game, principleVar,  depth+1, finishTime);
 		}
 		
-		//result = new int[depth];
-		//int score = alphabeta(game, bestsofar, result, 0, limit, MIN_VALUE, MAX_VALUE, 1);
-		//for (int i=0; i<depth-1; i++) {
-		//	principleVar[i] = bestsofar[i]; //Arrays.copyOf(result, limit);
-		//}
+		for (int[] r : principleVar) {
+			System.out.println(Arrays.toString(r));
+		}
 		return score;
 	}
 	
@@ -154,14 +155,18 @@ public class HexAI extends Mover {
 			int color) {
 		
 		int score;
-		int[] tempPV = new int[maxDepth];
 		nodesSearched++;
 		
-		// So if we need to stop or if the game is over then return the score.
-		if (depth == limit || game.isOver()) {
-			// Quiescence search here?
-			nodesEval++;
+		// If the game is over then return the score.
+		if (game.isOver()) {
 			return color * evaluation(game, playerId);
+		}
+		
+		// So if we need to stop 
+		if (depth == limit) {
+			// Quiescence search?
+			nodesEval++;
+			return color * evaluation(game, playerId); //qsearch(game, playerId, 4);
 		}
 		
 		// If the current player can't actually move then it's the other players
@@ -169,73 +174,94 @@ public class HexAI extends Mover {
 		if (!game.canCurrentPlayerMove()) {
 			game = game.clone(); //Fix
 			game.swapPlayers();
-			return -alphabeta(game, principleVar, 
-					depth+1, limit, -beta, -alpha, -color);
+			return -alphabeta(game, principleVar, depth+1, 
+							  limit, -beta, -alpha, -color);
 		}
 		
-		int pmove = -1;
-		if (principleVar.length > depth) {
-			pmove = principleVar[depth][depth];
-			if (pmove >= 0 && game.isValidMove(pmove)) {
-				// Get the score of this move.
-				score = -alphabeta(game.afterMove(pmove), principleVar,
-						depth+1, limit, -beta, -alpha, -color);
-				
-				// Get move.
-				if (score >= alpha) {
-					for (int i=0; i<principleVar.length; i++) {
-						principleVar[depth][i] = principleVar[i];
-					}
-					principleVar[depth] = pmove;
-					alpha = score;
-					//System.out.println("PV Changed: " + java.util.Arrays.toString(principleVar));
-					//PV_SCORES[depth] = evaluation(game, playerId);
-					
+		/*
+		int pmove = principleVar[0][depth];
+		if (pmove >= 0 && game.isValidMove(pmove)) {
+			// Get the score of this move.
+			score = -alphabeta(game.afterMove(pmove), principleVar,
+							   depth+1, limit, -beta, -alpha, -color);
+			
+			// Get move.
+			if (score >= alpha) {
+				for (int i=0; i<limit-depth-1; i++) {
+					principleVar[depth][i+1] = principleVar[depth+1][i];
 				}
+				principleVar[depth][0] = pmove;
 				
-				// AlphaBeta pruning.
-				// Improve?
-				if (beta <= alpha) {
-					return alpha;
-				}
+				System.out.println(depth + " " + limit);
+				game.display();
+				System.out.println(Arrays.toString(principleVar[depth]));
+				game.moveSequence(Arrays.copyOf(principleVar[depth], limit-depth));
+				
+				alpha = score;
+				//System.out.println("PV Changed: " + java.util.Arrays.toString(principleVar));
+				//PV_SCORES[depth] = evaluation(game, playerId);
+				
+			}
+			
+			// AlphaBeta pruning.
+			// Improve?
+			if (beta <= alpha) {
+				return alpha;
 			}
 		}
-		
+
+		*/
+		int pmove = -1;
 		// Otherwise consider each move.
 		for (int move : game.allValidMoves()) {
 			if (move >= 0 && move != pmove) {
 				// Get the score of this move.
-				score = -alphabeta(game.afterMove(move), tempPV,
-						depth+1, limit, -beta, -alpha, -color);
-				
+				//assert (game.isValidMove(move));
+				score = -alphabeta(game.afterMove(move), principleVar,
+								   depth+1, limit, -beta, -alpha, -color);
+				//assert (game.isValidMove(move));
 				// Get move.
-				if (score >= alpha) {
-					if (false) {
-						System.out.println("!!!!!!!" + move);
-						System.out.println("!!!!!!?" + score);
-						System.out.println(principleVar[depth]);
+				if (score > alpha) {
+					//assert (game.isValidMove(move));
+					testestes.copyandinsert(principleVar[depth], principleVar[depth+1], limit-depth-1, move);
+					//for (int i=0; i<limit-depth; i++) {
+					//	principleVar[depth][i+1] = principleVar[depth+1][i];
+					//}
+					//principleVar[depth][0] = move;
+					//System.out.println(depth + " " + limit + " " + move);
+					//Game a = game.clone();
+					game.display();
+					//System.out.println(Arrays.toString(principleVar[depth-1]));
+					for (int[] r : principleVar) {
+						System.out.println(Arrays.toString(r));
 					}
-					for (int i=0; i<principleVar.length; i++) {
-						principleVar[i] = tempPV[i];
+					System.out.println(Arrays.toString(principleVar[depth]));
+					System.out.println(Arrays.toString(principleVar[depth+1]));
+					//System.out.println(a.getCurrentPlayerId());
+					assert (game.isValidMove(principleVar[depth][0]));
+					if (depth==0) {
+						game.moveSequence(Arrays.copyOf(principleVar[depth], limit-depth));
 					}
-					principleVar[depth] = move;
+					assert (game.isValidMove(principleVar[depth][0]));
+					
 					alpha = score;
 					//principleVar[depth] = move;
 					//PV_SCORES[depth] = evaluation(game, playerId);
 					
 				}
 				
-				// AlphaBeta pruning.
-				// Improve?
-				if (beta <= alpha) {
-					break;
-				}
+				//AlphaBeta pruning.
+				//Improve?
+				//if (beta <= alpha) {
+				//	break;
+				//}
+				
 			}
 		}
 		return alpha;	
 	}
 	
-	private int exhaustSearch(Game game, int limit, int color) {
+	private int exhaustSearch(Game game, int[][] principleVar, int limit, int color) {
 		boolean indeter = false;
 		
 		// If we haven't found a solution by now we'll have to stop not
@@ -255,7 +281,7 @@ public class HexAI extends Mover {
 		// If we can't move the other player takes another move.
 		if (!game.canCurrentPlayerMove()) {
 			game.swapPlayers();
-			return -exhaustSearch(game, limit-1, -color);
+			return -exhaustSearch(game, principleVar, limit-1, -color);
 		}
 		
 		// If we can make a winning move then this variation wins! So we can 
@@ -265,7 +291,7 @@ public class HexAI extends Mover {
 		// then this variation loses.
 		for (int move : game.allValidMoves()) {
 			if (move >= 0) {
-				int result = -exhaustSearch(game.afterMove(move), limit-1, -color);
+				int result = -exhaustSearch(game.afterMove(move), principleVar, limit-1, -color);
 				if (result == 1) {
 					return 1;
 				}
@@ -278,7 +304,61 @@ public class HexAI extends Mover {
 		return indeter ? 0 : -1;
 	}
 	
+	private int qsearch(Game game, int currentplayer, int depth) {
+		if (game.isOver()) {
+			return (currentplayer == game.getLeadingPlayer()) ? 1000 : -1000;
+		}
+		
+		if (depth == 0) {
+			return evaluation(game, currentplayer);
+		}
+		
+		if (!game.canCurrentPlayerMove()) {
+			game.swapPlayers();
+			return qsearch(game, currentplayer, depth-1);
+		}
+		
+		int biggestPotId = -1;
+		int smallestPotId = -1;
+		int biggestPotStones = 0;
+		int smallestPotStones = 48;
+		int stones = 0;
+		for (int m : game.allValidMoves()) {
+			if (m >= 0) {
+				stones = game.bowls[m].getStones();
+				if (stones >= biggestPotStones) {
+					biggestPotStones = stones;
+					biggestPotId = m;
+				}
+				if (stones < smallestPotStones) {
+					smallestPotStones = stones;
+					smallestPotId = m;
+				}
+			}
+		}
+		
+		Game tgame = game.afterMove(biggestPotId);
+		if (tgame.isOver()) {
+			return (currentplayer == game.getLeadingPlayer()) ? 1000 : -1000; 
+		}
+		
+		game.move(smallestPotId);
+		return qsearch(game, currentplayer, depth-1);
+	}
 	
+	private int evaluation(Game game, int currentplayer) {
+		if (game.isOver()) {
+			nodesTerm++;
+			return (currentplayer == game.getLeadingPlayer()) 
+			                      ? MAX_VALUE : MIN_VALUE;
+		}
+		
+		int s1 = game.getPlayer(currentplayer).getScore();
+		int s2 = game.getPlayer((currentplayer+1)%2).getScore();
+		return 100 + s1 - s2;
+	}
+	
+	/*
 	private int evaluation(Game game, int currentplayer) {
 		if (game.isOver()) {
 			nodesTerm++;
@@ -349,21 +429,21 @@ public class HexAI extends Mover {
 			}
 		}
 		
-		/*int LBFactor = 6;
-		int largebowls = 0;
-		for (int i=currentplayer*6; i<6+currentplayer*6; i++) {
-			if (game.bowls[i].getStones() >= 8) {
-				largebowls++;
-			}
-		}
-		int OBFactor = 1;
-		int onebowls = 0;
-		for (int i=((currentplayer+1)%2)*6; i<6+((currentplayer+1)%2)*6; i++) {
-			if (game.bowls[i].getStones() == 1) {
-				onebowls++;
-			}
-		}*/
+//		int LBFactor = 6;
+//		int largebowls = 0;
+//		for (int i=currentplayer*6; i<6+currentplayer*6; i++) {
+//			if (game.bowls[i].getStones() >= 8) {
+//				largebowls++;
+//			}
+//		}
+//		int OBFactor = 1;
+//		int onebowls = 0;
+//		for (int i=((currentplayer+1)%2)*6; i<6+((currentplayer+1)%2)*6; i++) {
+//			if (game.bowls[i].getStones() == 1) {
+//				onebowls++;
+//			}
+//		}
 		return 100 + s1 - s2 + guessP1 - guessP2; //+ largeBowlFet + medBowlFet; 
 	}
-
+	*/
 }

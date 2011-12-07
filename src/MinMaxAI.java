@@ -9,7 +9,7 @@ public class MinMaxAI extends Mover {
 	private int playerId;
 
 	@Override
-	public int getMove(Game game, String name) {
+	public int getMove(Game game, int opponentMove, String name) {
 		playerId = game.getCurrentPlayerId();
 		
 		ScorePair score = minmax(game, depth);

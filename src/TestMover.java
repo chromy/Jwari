@@ -8,6 +8,7 @@ public class TestMover {
 		Mover p2 = Owari.getMover();
 		
 		
+		int move = -1;
 		Mover[] players = {p1, p2};
 		int[] results = {0, 0};
 		int totalturns = 0;
@@ -34,7 +35,7 @@ public class TestMover {
 				}
 				
 				timebefore = System.currentTimeMillis();
-				int move = players[cp].getMove(game, names[cp]);
+				move = players[cp].getMove(game, move, names[cp]);
 				times[game.getCurrentPlayerId()] += System.currentTimeMillis() - timebefore;
 				if (!game.isValidMove(move)) {
 					System.out.println("Move not valid. Move was: " + move + " Player was: " + names[cp]);

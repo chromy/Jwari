@@ -98,9 +98,8 @@ public class Game implements Cloneable {
 	}
 	
 	/**
-	 * 
 	 * @param The number of a bowl (0-11).
-	 * @return
+	 * @return true iff that move is valid
 	 */
 	public boolean isValidMove(int bowl) {
 		return (bowl>=0 
@@ -110,6 +109,10 @@ public class Game implements Cloneable {
 				&& bowls[bowl].getStones()>0);
 	}
 	
+	/**
+	 * Returns true if current player can make any move.
+	 * @return true iff current player can make a move.
+	 */
 	public boolean canCurrentPlayerMove() {
 		for (int i=0; i<bowls.length; i++) {
 			if (isValidMove(i)) {
@@ -120,6 +123,13 @@ public class Game implements Cloneable {
 		
 	}
 	
+	/**
+	 * Updates the state to reflect the given move taking place.
+	 * Changes bowls state, updates player scores and swaps the players so the 
+	 * next player is starting. Move must be valid. Swaps players even if the 
+	 * player swapped to has no valid move.
+	 * @param bowl number of bowl to 'move' (0-11).
+	 */
 	public void move(int bowl) {
 		assert (isValidMove(bowl)) : "Move must be valid. Move was: " + bowl;
 		int stones = bowls[bowl].takeAllStones();
@@ -133,6 +143,31 @@ public class Game implements Cloneable {
 		swapPlayers();
 	}
 	
+
+	/**
+	 * 
+	 * @param moves
+	 * @return
+	 */
+	public Game moveSequence(int[] moves) {
+		Game game = clone();
+		int m = 0;
+		for (int i=0; i<moves.length; i++) {
+			m = moves[i];
+			if (game.isOver()) {
+				break;
+			} else if (!game.canCurrentPlayerMove()) {
+				game.swapPlayers();
+			} else {
+				assert (game.isValidMove(m)) : "Move " + m + " in move sequence " + java.util.Arrays.toString(moves) + " is not valid.";
+				game.move(m);
+			}
+			
+			game.display();
+		}
+		return game;
+	}
+	
 	/**
 	 * Returns a new game object with the state of the current game object 
 	 * updated by the given move.
@@ -143,8 +178,7 @@ public class Game implements Cloneable {
 		assert (isValidMove(bowl)) : "Move must be valid. Move was: " + bowl;
 		Game copy = this.clone();
 		copy.move(bowl);
-		return copy;
-		
+		return copy;	
 	}
 	
 	/**

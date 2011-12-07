@@ -6,7 +6,7 @@ public class AlphaBetaAI extends Mover {
 	private int[] killermoves;
 
 	@Override
-	public int getMove(Game game, String name) {
+	public int getMove(Game game, int opponentMove, String name) {
 		playerId = game.getCurrentPlayerId();
 		//ScorePair score = alphabeta(game, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		//killermoves = new int[depth];

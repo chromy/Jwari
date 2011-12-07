@@ -17,7 +17,7 @@ public class RandomAI extends Mover {
 		System.out.println(random.toString());
 	}
 	
-	public int getMove(Game game, String name) {
+	public int getMove(Game game, int opponentMove, String name) {
 		int move;
 		do {
 			move = random.nextInt(12);

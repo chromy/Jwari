@@ -4,6 +4,7 @@ import java.util.Random;
 public class Owari {
 	public static void main(String[] args) {
 		Game game = new Game();
+		int move = -1;
 		
 		System.out.println("Pick player 1.");
 		Mover p1 = getMover();
@@ -22,7 +23,7 @@ public class Owari {
 				continue;
 			}
 			
-			int move = players[cp].getMove(game, names[cp]);
+			move = players[cp].getMove(game, move, names[cp]);
 			assert (game.isValidMove(move)) : "Move not valid. Move was: " + move + " Player was: " + names[cp];
 			
 			game.move(move);

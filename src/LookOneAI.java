@@ -2,7 +2,7 @@ public class LookOneAI extends Mover {
 	private static String movertype = "LookOneAI";
 
 	@Override
-	public int getMove(Game game, String name) {
+	public int getMove(Game game, int opponentMove, String name) {
 		int cp = game.getCurrentPlayerId();
 		int bestmove = -1; //Ugly.
 		int bestscore = Integer.MIN_VALUE;
