@@ -2,44 +2,43 @@ import junit.framework.TestCase;
 
 
 public class GameTest extends TestCase {
-	
+
 	public void testGame() {
-		Game game = new Game();
-		assertTrue(!game.isOver());
-		assertTrue(game.getCurrentPlayerId() == 0);
+		Game g = new Game();
+		assertTrue(g.canCurrentPlayerMove());
+		assertTrue(g.getCurrentPlayerId()==0);
 	}
 
 	public void testClone() {
 		Game g = new Game();
 		Game c = g.clone();
-		c.display();
+		assertTrue(g != c);
+		assertTrue(g.bowls != c.bowls);
+		assertTrue(g.bowls.length == c.bowls.length);
+		for (int i=0; i<g.bowls.length; i++) {
+			assertTrue(g.bowls[i] != c.bowls[i]);
+			assertTrue(g.bowls[i].getStones() == c.bowls[i].getStones());
+		}
+		assertTrue(g.getCurrentPlayerId() == c.getCurrentPlayerId());
+		assertTrue(g.getPlayer(0) != c.getPlayer(0));
+		assertTrue(g.getPlayer(1) != c.getPlayer(1));
+		assertTrue(g.getPlayer(0).getScore() == c.getPlayer(0).getScore());
 	}
 
 	public void testSwapPlayers() {
-		Game game = new Game();
-		int firstplayer = 0;
-		int secondplayer = 1;
-		assertTrue(game.getCurrentPlayerId() == firstplayer);
-		game.swapPlayers();
-		assertTrue(game.getCurrentPlayerId() == secondplayer);
-		game.swapPlayers();
-		assertTrue(game.getCurrentPlayerId() == firstplayer);
-		
+		for (int i=0; i<100; i++) {
+			Game g = new Game();
+			for (int j=0; j<i; j++) {
+				g.swapPlayers();
+			}
+			assertTrue(g.getCurrentPlayerId() == i%2);
+		}
+
 	}
 
 	public void testAllValidMoves() {
-		Game game = new Game();
-		//All moves valid at the beginning of game.
-		int[] validmovesp1 = {0, 1, 2, 3, 4, 5};  
-		int[] validmovesp2 = {6, 7, 8, 9, 10, 11};
-		int[] validmovesp1t2 = {-1, 1, 2, 3, 4, 5};
-		
-		assertTrue(game.allValidMoves() == validmovesp1);
-		game.move(0);
-		game.swapPlayers();
-		assertTrue(game.allValidMoves() == validmovesp2);
-		game.swapPlayers();
-		assertTrue(game.allValidMoves() == validmovesp1t2);
+		Game g = new Game();
+		int[] validmoves1 = {0, 1, 2, 3, 4, 5, 6}; 
 	}
 
 	public void testIsValidMove() {
@@ -51,14 +50,11 @@ public class GameTest extends TestCase {
 	}
 
 	public void testMove() {
-		Bowl[] b = {new Bowl(0), new Bowl(6), new Bowl(0), new Bowl(7), new Bowl(6), new Bowl(5), new Bowl(5), new Bowl(5), new Bowl(6), new Bowl(5), new Bowl(5), new Bowl(1)};
-		Game g = new Game(new Player(), new Player(), b);
-		g.swapPlayers();
-		g.display();
-		g.move(7);
-		g.display();
-		g.move(0);
-		g.display();
+		fail("Not yet implemented");
+	}
+
+	public void testMoveSequence() {
+		fail("Not yet implemented");
 	}
 
 	public void testAfterMove() {

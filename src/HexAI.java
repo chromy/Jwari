@@ -12,7 +12,7 @@ public class HexAI extends Mover {
 	private int depthReached = 0;
 	
 	
-	private final int maxDepth = 8;
+	private final int maxDepth = 30;
 	private int[] PV;
 	private int[][] PVTri = makeTriArray(maxDepth+1);
 	
@@ -20,8 +20,8 @@ public class HexAI extends Mover {
 	private static int MIN_VALUE = -100000;
 	private static int MAX_VALUE = 100000;
 	// Time for each move (in ms).
-	private final long timeBudget = 10*1000;
-	// True iff we'ver proved we can force a win.
+	private final long timeBudget = 20*1000;
+	// True iff we've proved we can force a win.
 	private boolean forcewin = false;
 	
 	
@@ -51,7 +51,7 @@ public class HexAI extends Mover {
 			//} else {
 			//	score = IDalphabeta(game, PVTri, 4, finishTime);
 			//}
-			score = IDalphabeta(game, PVTri, maxDepth, finishTime);
+			score = IDalphabeta(game, PVTri, 4, finishTime);
 			long t4 = System.currentTimeMillis();
 			PV = PVTri[0];
 			
@@ -92,9 +92,9 @@ public class HexAI extends Mover {
 			System.out.println("Calculation took: " + (t2-t1) + "ms");
 		}
 
-		System.out.println("---------------------------------");
+//		System.out.println("---------------------------------");
 
-		game.display();
+		//game.display();
 		System.out.println(Arrays.toString(PV));
 		assert (game.isValidMove(PV[0])) : "getMove returned an invalid move.";
 		Game afterPV = game.moveSequence(Arrays.copyOf(PV, Math.max(0, depthReached-1)));
@@ -228,26 +228,24 @@ public class HexAI extends Mover {
 				assert (game.isValidMove(move));
 				score = -alphabeta(game.afterMove(move), thevar,
 								   depth+1, limit, -beta, -alpha, -color);
-				
-				//AlphaBeta pruning.
-				//Improve?
-				if (score >= beta) {
-					return beta;
-				}
 
 				// Record move.
 				if (score >= alpha) {
 					//copyandinsert(principleVar[depth], principleVar[depth+1], limit-depth-1, move);
 					copyandinsert(principleVar, thevar, limit-depth-1, move);
 					alpha = score;
-
+				
 					//game.display();
 					//System.out.println(Arrays.toString(principleVar[0]));
-				    //game.moveSequence(Arrays.copyOf(principleVar[depth], limit-depth));
-					
-
-					
-				}
+					//game.afterMove(move).moveSequence(Arrays.copyOf(thevar, limit-depth-1));
+					//game.moveSequence(Arrays.copyOf(principleVar, limit-depth));
+				    
+				}	
+				//AlphaBeta pruning.
+				//Improve?
+				if (score >= beta) {
+					return beta;
+				}					
 			}
 		}
 		return alpha;	

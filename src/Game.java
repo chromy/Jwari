@@ -10,8 +10,6 @@ public class Game implements Cloneable {
 	private Player[] players;
 	public Bowl[] bowls;
 	
-	
-	
 	/**
 	 * Default constructor - make all our members by our self.
 	 */
@@ -21,20 +19,11 @@ public class Game implements Cloneable {
 		for (int i=0; i<bowls.length; i++) {
 			bowls[i] = new Bowl(4);
 		}
-		
-	}
-	
-	/**
-	 * Testing constructor - let call give us our members.
-	 */
-	public Game(Player p1, Player p2, Bowl[] bowls) {
-		assert (numberofbowls == bowls.length);
-		players = new Player[] {p1, p2};
-		this.bowls = bowls;
 	}
 	
 	/**
 	 * Get a deep copy of self. 
+	 * @return A deep copy of the this game.
 	 */
 	public Game clone() {
 		try {
@@ -165,7 +154,7 @@ public class Game implements Cloneable {
 				game.move(m);
 			}
 			
-			game.display();
+			//game.display();
 		}
 		return game;
 	}
@@ -247,7 +236,5 @@ public class Game implements Cloneable {
 		System.out.println(line);
 		System.out.println();
 		System.out.println("Player 1: " + players[0].getScore());
-		
 	}
-	
 }
