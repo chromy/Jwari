@@ -12,7 +12,7 @@ public class HexAI extends Mover {
 	private int depthReached = 0;
 	
 	
-	private final int maxDepth = 6;
+	private final int maxDepth = 8;
 	private int[] PV;
 	private int[][] PVTri = makeTriArray(maxDepth+1);
 	
@@ -20,7 +20,7 @@ public class HexAI extends Mover {
 	private static int MIN_VALUE = -100000;
 	private static int MAX_VALUE = 100000;
 	// Time for each move (in ms).
-	private final long timeBudget = 5*1000;
+	private final long timeBudget = 10*1000;
 	// True iff we'ver proved we can force a win.
 	private boolean forcewin = false;
 	
@@ -94,14 +94,15 @@ public class HexAI extends Mover {
 
 		System.out.println("---------------------------------");
 
-
-
+		game.display();
+		System.out.println(Arrays.toString(PV));
+		assert (game.isValidMove(PV[0])) : "getMove returned an invalid move.";
 		Game afterPV = game.moveSequence(Arrays.copyOf(PV, Math.max(0, depthReached)));
 		System.out.println("------------AFTER_PV-------------");
 		afterPV.display();
 		System.out.println("---------------------------------");
 		
-		//assert (bestmove >= 0) : "getMove returned an invalid move.";
+		//
 		return PV[0];
 	}
 	
@@ -216,46 +217,28 @@ public class HexAI extends Mover {
 		for (int move : game.allValidMoves()) {
 			if (move >= 0 && move != pmove) {
 				// Get the score of this move.
-				//assert (game.isValidMove(move));
+				assert (game.isValidMove(move));
 				score = -alphabeta(game.afterMove(move), principleVar,
 								   depth+1, limit, -beta, -alpha, -color);
-				//assert (game.isValidMove(move));
-				// Get move.
-				if (score > alpha) {
-					//assert (game.isValidMove(move));
-					testestes.copyandinsert(principleVar[depth], principleVar[depth+1], limit-depth-1, move);
-					//for (int i=0; i<limit-depth; i++) {
-					//	principleVar[depth][i+1] = principleVar[depth+1][i];
-					//}
-					//principleVar[depth][0] = move;
-					//System.out.println(depth + " " + limit + " " + move);
-					//Game a = game.clone();
-					game.display();
-					//System.out.println(Arrays.toString(principleVar[depth-1]));
-					for (int[] r : principleVar) {
-						System.out.println(Arrays.toString(r));
-					}
-					System.out.println(Arrays.toString(principleVar[depth]));
-					System.out.println(Arrays.toString(principleVar[depth+1]));
-					//System.out.println(a.getCurrentPlayerId());
-					assert (game.isValidMove(principleVar[depth][0]));
-					if (depth==0) {
-						game.moveSequence(Arrays.copyOf(principleVar[depth], limit-depth));
-					}
-					assert (game.isValidMove(principleVar[depth][0]));
-					
-					alpha = score;
-					//principleVar[depth] = move;
-					//PV_SCORES[depth] = evaluation(game, playerId);
-					
-				}
 				
 				//AlphaBeta pruning.
 				//Improve?
-				//if (beta <= alpha) {
-				//	break;
+				//if (score >= beta) {
+				//	return beta;
 				//}
-				
+
+				// Record move.
+				if (score > alpha) {
+					copyandinsert(principleVar[depth], principleVar[depth+1], limit-depth-1, move);
+					alpha = score;
+
+					//game.display();
+					//System.out.println(Arrays.toString(principleVar[0]));
+				    //game.moveSequence(Arrays.copyOf(principleVar[depth], limit-depth));
+					
+
+					
+				}
 			}
 		}
 		return alpha;	
@@ -356,6 +339,14 @@ public class HexAI extends Mover {
 		int s1 = game.getPlayer(currentplayer).getScore();
 		int s2 = game.getPlayer((currentplayer+1)%2).getScore();
 		return 100 + s1 - s2;
+	}
+	
+	
+	public static void copyandinsert(int[] l1, int[] l2, int n, int e) {
+		for (int i=0; i<n; i++) {
+			l1[i+1] = l2[i];
+		}
+		l1[0] = e; 
 	}
 	
 	/*
