@@ -97,7 +97,7 @@ public class HexAI extends Mover {
 		game.display();
 		System.out.println(Arrays.toString(PV));
 		assert (game.isValidMove(PV[0])) : "getMove returned an invalid move.";
-		Game afterPV = game.moveSequence(Arrays.copyOf(PV, Math.max(0, depthReached)));
+		Game afterPV = game.moveSequence(Arrays.copyOf(PV, Math.max(0, depthReached-1)));
 		System.out.println("------------AFTER_PV-------------");
 		afterPV.display();
 		System.out.println("---------------------------------");
@@ -135,7 +135,8 @@ public class HexAI extends Mover {
 	// iterative deepening
 	private int IDalphabeta(Game game, int[][] principleVar, int depth, long finishTime) {
 		depthReached = depth;
-		int score = alphabeta(game, principleVar, 0, depth, MIN_VALUE, MAX_VALUE, 1);
+		Arrays.fill(principleVar[0], -1);
+		int score = alphabeta(game, principleVar[0], 0, depth, MIN_VALUE, MAX_VALUE, 1);
 		
 		if (finishTime > System.currentTimeMillis() && maxDepth > depth) {
 			return IDalphabeta(game, principleVar,  depth+1, finishTime);
@@ -148,12 +149,14 @@ public class HexAI extends Mover {
 	}
 	
 	private int alphabeta(Game game, 
-			int[][] principleVar,
+			int[] principleVar,
 			int depth,
 			int limit,
 			int alpha,
 			int beta, 
 			int color) {
+		
+		
 		
 		int score;
 		nodesSearched++;
@@ -170,13 +173,18 @@ public class HexAI extends Mover {
 			return color * evaluation(game, playerId); //qsearch(game, playerId, 4);
 		}
 		
+		int[] thevar = new int[limit-depth-1];
+		Arrays.fill(thevar, -1);
+		
 		// If the current player can't actually move then it's the other players
 		// turn again.
 		if (!game.canCurrentPlayerMove()) {
 			game = game.clone(); //Fix
 			game.swapPlayers();
-			return -alphabeta(game, principleVar, depth+1, 
+			score = -alphabeta(game, thevar, depth+1, 
 							  limit, -beta, -alpha, -color);
+			copyandinsert(principleVar, thevar, limit-depth-1, -2);
+			return score;
 		}
 		
 		/*
@@ -218,18 +226,19 @@ public class HexAI extends Mover {
 			if (move >= 0 && move != pmove) {
 				// Get the score of this move.
 				assert (game.isValidMove(move));
-				score = -alphabeta(game.afterMove(move), principleVar,
+				score = -alphabeta(game.afterMove(move), thevar,
 								   depth+1, limit, -beta, -alpha, -color);
 				
 				//AlphaBeta pruning.
 				//Improve?
-				//if (score >= beta) {
-				//	return beta;
-				//}
+				if (score >= beta) {
+					return beta;
+				}
 
 				// Record move.
-				if (score > alpha) {
-					copyandinsert(principleVar[depth], principleVar[depth+1], limit-depth-1, move);
+				if (score >= alpha) {
+					//copyandinsert(principleVar[depth], principleVar[depth+1], limit-depth-1, move);
+					copyandinsert(principleVar, thevar, limit-depth-1, move);
 					alpha = score;
 
 					//game.display();

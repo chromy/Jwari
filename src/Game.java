@@ -156,6 +156,8 @@ public class Game implements Cloneable {
 			m = moves[i];
 			if (game.isOver()) {
 				break;
+			} else if (m == -1) {
+					break;
 			} else if (!game.canCurrentPlayerMove()) {
 				game.swapPlayers();
 			} else {
