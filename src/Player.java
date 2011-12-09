@@ -1,9 +1,11 @@
+import java.util.ArrayDeque;
+
 /** 
  * The Player class stores the score of the player and and allows the
  * score to increase.
  */
 public class Player implements Cloneable {
-	
+	private ArrayDeque<Integer> history = new ArrayDeque<Integer>();
 	private int score;
 	
 	public Player(int score) {
@@ -21,6 +23,15 @@ public class Player implements Cloneable {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public void restore() {
+		assert (!history.isEmpty()) : "Can't restore any more scores.";
+		score = history.pop();
+	}
+	
+	public void store() {
+		history.push(score);
 	}
 	
 	/**

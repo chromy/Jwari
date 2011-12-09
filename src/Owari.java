@@ -27,6 +27,8 @@ public class Owari {
 			assert (game.isValidMove(move)) : "Move not valid. Move was: " + move + " Player was: " + names[cp];
 			
 			game.move(move);
+			game.undomove();
+			game.move(move);
 			//game = game.afterMove(move);
 			System.out.println(names[cp] + " made the move: " + (move+1));
 			pressAnyKey();

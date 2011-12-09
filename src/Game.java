@@ -129,6 +129,17 @@ public class Game implements Cloneable {
 			stones--;
 		}
 		updateBowles();
+		storeScores();
+		swapPlayers();
+	}
+	
+	public void undomove() {
+		for (Bowl b : bowls) {
+			b.restore();
+		}
+		for (Player p : players) {
+			p.restore();
+		}
 		swapPlayers();
 	}
 	
@@ -145,16 +156,14 @@ public class Game implements Cloneable {
 			m = moves[i];
 			if (game.isOver()) {
 				break;
-			} else if (m == -1) {
-					break;
+			} else if (m < 0) {
+				break;
 			} else if (!game.canCurrentPlayerMove()) {
 				game.swapPlayers();
 			} else {
 				assert (game.isValidMove(m)) : "Move " + m + " in move sequence " + java.util.Arrays.toString(moves) + " is not valid.";
 				game.move(m);
 			}
-			
-			//game.display();
 		}
 		return game;
 	}
@@ -180,6 +189,12 @@ public class Game implements Cloneable {
 		int cp = getCurrentPlayerId();
 		for (Bowl b : bowls) {
 			players[cp].addToScore(b.updateAndGetScore());
+		}
+	}
+	
+	private void storeScores() {
+		for (Player p : players) {
+			p.store();
 		}
 	}
 	

@@ -12,7 +12,7 @@ public class HexAI extends Mover {
 	private int depthReached = 0;
 	
 	
-	private final int maxDepth = 30;
+	private final int maxDepth = 7;
 	private int[] PV;
 	private int[][] PVTri = makeTriArray(maxDepth+1);
 	
@@ -20,7 +20,7 @@ public class HexAI extends Mover {
 	private static int MIN_VALUE = -100000;
 	private static int MAX_VALUE = 100000;
 	// Time for each move (in ms).
-	private final long timeBudget = 1*1000;
+	private final long timeBudget = 5*1000;
 	// True iff we've proved we can force a win.
 	private boolean forcewin = false;
 	
@@ -135,8 +135,7 @@ public class HexAI extends Mover {
 	// iterative deepening
 	private int IDalphabeta(Game game, int[][] principleVar, int depth, long finishTime) {
 		depthReached = depth;
-		Arrays.fill(principleVar[0], -1);
-		int score = alphabeta(game, principleVar[0], 0, depth, MIN_VALUE, MAX_VALUE, 1);
+		int score = alphabeta(game, principleVar, 0, depth, MIN_VALUE, MAX_VALUE, 1);
 		
 		if (finishTime > System.currentTimeMillis() && maxDepth > depth) {
 			return IDalphabeta(game, principleVar,  depth+1, finishTime);
@@ -149,20 +148,19 @@ public class HexAI extends Mover {
 	}
 	
 	private int alphabeta(Game game, 
-			int[] principleVar,
+			int[][] principleVar,
 			int depth,
 			int limit,
 			int alpha,
 			int beta, 
 			int color) {
 		
-		
-		
 		int score;
 		nodesSearched++;
 		
 		// If the game is over then return the score.
 		if (game.isOver()) {
+			nodesEval++;
 			return color * evaluation(game, playerId);
 		}
 		
@@ -173,17 +171,16 @@ public class HexAI extends Mover {
 			return color * evaluation(game, playerId); //qsearch(game, playerId, 4);
 		}
 		
-		int[] thevar = new int[limit-depth-1];
-		Arrays.fill(thevar, -1);
+		Arrays.fill(principleVar[depth], -1);
 		
 		// If the current player can't actually move then it's the other players
 		// turn again.
 		if (!game.canCurrentPlayerMove()) {
-			game = game.clone(); //Fix
 			game.swapPlayers();
-			score = -alphabeta(game, thevar, depth+1, 
-							  limit, -beta, -alpha, -color);
-			copyandinsert(principleVar, thevar, limit-depth-1, -2);
+			score = -alphabeta(game, principleVar, depth+1, 
+							   limit, -beta, -alpha, -color);
+			copyandinsert(principleVar[depth], principleVar[depth+1], limit-depth-1, -2);
+			game.swapPlayers();
 			return score;
 		}
 		
@@ -224,28 +221,33 @@ public class HexAI extends Mover {
 		// Otherwise consider each move.
 		for (int move : game.allValidMoves()) {
 			if (move >= 0 && move != pmove) {
+				// Note to self: DON'T TOUCH
+				
 				// Get the score of this move.
-				assert (game.isValidMove(move));
-				score = -alphabeta(game.afterMove(move), thevar,
-								   depth+1, limit, -beta, -alpha, -color);
+				//score = -alphabeta(game.afterMove(move), principleVar,
+				//				   depth+1, limit, -beta, -alpha, -color);
+				game.move(move);
+				score = -alphabeta(game, principleVar, depth+1, limit, 
+						           -beta, -alpha, -color);
+				game.undomove();
+				
+				//AlphaBeta pruning.
+				//Improve?
+				if (score >= beta) {
+					return beta;
+				}			
 
 				// Record move.
-				if (score >= alpha) {
-					//copyandinsert(principleVar[depth], principleVar[depth+1], limit-depth-1, move);
-					copyandinsert(principleVar, thevar, limit-depth-1, move);
+				if (score > alpha) {
+					copyandinsert(principleVar[depth], principleVar[depth+1], limit-depth-1, move);
 					alpha = score;
 				
 					//game.display();
 					//System.out.println(Arrays.toString(principleVar[0]));
 					//game.afterMove(move).moveSequence(Arrays.copyOf(thevar, limit-depth-1));
-					//game.moveSequence(Arrays.copyOf(principleVar, limit-depth));
+					//game.moveSequence(principleVar[depth]);
 				    
-				}	
-				//AlphaBeta pruning.
-				//Improve?
-				if (score >= beta) {
-					return beta;
-				}					
+				}
 			}
 		}
 		return alpha;	
@@ -340,7 +342,7 @@ public class HexAI extends Mover {
 		if (game.isOver()) {
 			nodesTerm++;
 			return (currentplayer == game.getLeadingPlayer()) 
-			                      ? MAX_VALUE : MIN_VALUE;
+			                      ? MAX_VALUE-100 : MIN_VALUE+100;
 		}
 		
 		int s1 = game.getPlayer(currentplayer).getScore();
@@ -355,93 +357,4 @@ public class HexAI extends Mover {
 		}
 		l1[0] = e; 
 	}
-	
-	/*
-	private int evaluation(Game game, int currentplayer) {
-		if (game.isOver()) {
-			nodesTerm++;
-			return (currentplayer == game.getLeadingPlayer()) 
-			                      ? MAX_VALUE : MIN_VALUE;
-		}
-		int s1 = game.getPlayer(currentplayer).getScore();
-		int s2 = game.getPlayer((currentplayer+1)%2).getScore();
-		// We're going to end up negating this depending on the player so 
-		// it has to be symmetric
-		
-		int myLargeBowls = 0;
-		int myMedBowls = 0;
-		int otherLargeBowls = 0;
-		int oneBowls = 0;
-		int zeroBowls = 0;
-		int stones;
-		
-		// My side.
-		for (int i=currentplayer*6; i<6+currentplayer*6; i++) {
-			stones = game.bowls[i].getStones();
-			if (stones >= 8) {
-				myLargeBowls++;
-			} else if (stones >= 6) {
-				myMedBowls++;
-			} else if (stones == 1) {
-				oneBowls++;
-			} else if (stones == 0) {
-				zeroBowls++;
-			}
-		}
-		
-		int largeBowlFet = 5 * myLargeBowls;
-		int medBowlFet = 3 * myMedBowls;
-		
-		// The other side.
-		for (int i=((currentplayer+1)%2)*6; i<6+((currentplayer+1)%2)*6; i++) {
-			stones = game.bowls[i].getStones();
-			if ( stones >= 8) {
-				otherLargeBowls++;
-			}
-			if (stones == 1) {
-				oneBowls++;
-			}
-			if (stones == 0) {
-				zeroBowls++;
-			}
-		}
-		
-		int guessP1 = 0;
-		int guessP2 = 0;
-		int tmp;
-		while (myLargeBowls > 0 || otherLargeBowls > 0) {
-			if (myLargeBowls > 0) {
-				myLargeBowls--;
-				guessP1 += oneBowls;
-				tmp = oneBowls;
-				oneBowls = zeroBowls;
-				zeroBowls = tmp;
-			}
-			
-			if (otherLargeBowls > 0) {
-				otherLargeBowls--;
-				guessP2 += oneBowls;
-				tmp = oneBowls;
-				oneBowls = zeroBowls;
-				zeroBowls = tmp;
-			}
-		}
-		
-//		int LBFactor = 6;
-//		int largebowls = 0;
-//		for (int i=currentplayer*6; i<6+currentplayer*6; i++) {
-//			if (game.bowls[i].getStones() >= 8) {
-//				largebowls++;
-//			}
-//		}
-//		int OBFactor = 1;
-//		int onebowls = 0;
-//		for (int i=((currentplayer+1)%2)*6; i<6+((currentplayer+1)%2)*6; i++) {
-//			if (game.bowls[i].getStones() == 1) {
-//				onebowls++;
-//			}
-//		}
-		return 100 + s1 - s2 + guessP1 - guessP2; //+ largeBowlFet + medBowlFet; 
-	}
-	*/
 }
