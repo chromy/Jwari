@@ -20,7 +20,7 @@ public class HexAI extends Mover {
 	private static int MIN_VALUE = -100000;
 	private static int MAX_VALUE = 100000;
 	// Time for each move (in ms).
-	private final long timeBudget = 20*1000;
+	private final long timeBudget = 1*1000;
 	// True iff we've proved we can force a win.
 	private boolean forcewin = false;
 	
@@ -97,7 +97,7 @@ public class HexAI extends Mover {
 		//game.display();
 		System.out.println(Arrays.toString(PV));
 		assert (game.isValidMove(PV[0])) : "getMove returned an invalid move.";
-		Game afterPV = game.moveSequence(Arrays.copyOf(PV, Math.max(0, depthReached-1)));
+		Game afterPV = game.moveSequence(Arrays.copyOf(PV, Math.max(0, depthReached)));
 		System.out.println("------------AFTER_PV-------------");
 		afterPV.display();
 		System.out.println("---------------------------------");
