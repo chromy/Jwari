@@ -5,10 +5,11 @@ import java.util.ArrayDeque;
  * score to increase.
  */
 public class Player implements Cloneable {
-	private ArrayDeque<Integer> history = new ArrayDeque<Integer>();
+	private ArrayDeque<Integer> history = new ArrayDeque<Integer>(30);
 	private int score;
 	
 	public Player(int score) {
+		assert (score >= 0) : "Inital player score must be greater than 0.";
 		this.score = score;
 	}
 	
@@ -16,20 +17,31 @@ public class Player implements Cloneable {
 		score = 0;
 	}
 	
+	/**
+	 * @return A deep copy of ourselves.
+	 */
 	public Player clone() {
 		try {
-			return (Player)super.clone();
+			Player copy = (Player)super.clone();
+			copy.history = history.clone();
+			return copy;
 		} catch (CloneNotSupportedException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
 	
+	/**
+	 * Discards the current score to the recorded values.
+	 */
 	public void restore() {
 		assert (!history.isEmpty()) : "Can't restore any more scores.";
 		score = history.pop();
 	}
 	
+	/**
+	 * Adds the current score to the recorded values.
+	 */
 	public void store() {
 		history.push(score);
 	}
@@ -43,7 +55,7 @@ public class Player implements Cloneable {
 	
 	/**
 	 * Add the given integer to score;
-	 * @param score
+	 * @param Number to be added to score.
 	 */
 	public void addToScore(int score) {
 		assert (score >= 0) : "Score to add must be non-negative.";

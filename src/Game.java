@@ -7,7 +7,7 @@ public class Game implements Cloneable {
 	private static final int numberofbowls = 12;
 	private int halfway = (int)(numberofbowls/2); 
 	private int currentplayerId = 0;
-	private Player[] players;
+	public Player[] players;
 	public Bowl[] bowls;
 	
 	/**
@@ -117,22 +117,27 @@ public class Game implements Cloneable {
 	 * Changes bowls state, updates player scores and swaps the players so the 
 	 * next player is starting. Move must be valid. Swaps players even if the 
 	 * player swapped to has no valid move.
-	 * @param bowl number of bowl to 'move' (0-11).
+	 * @param bowlId number of bowl to 'move' (0-11).
 	 */
-	public void move(int bowl) {
-		assert (isValidMove(bowl)) : "Move must be valid. Move was: " + bowl;
-		int stones = bowls[bowl].takeAllStones();
+	public void move(int bowlId) {
+		assert (isValidMove(bowlId)) : "Move must be valid. Move was: " + bowlId;
+		storeScores();
+		storeStones();
+		int stones = bowls[bowlId].takeAllStones();
 		while (stones>0) {
-			bowl++;
-			bowl %= bowls.length;
-			bowls[bowl].depositStone();
+			bowlId++;
+			bowlId %= bowls.length;
+			
+			bowls[bowlId].depositStone();
 			stones--;
 		}
 		updateBowles();
-		storeScores();
 		swapPlayers();
 	}
 	
+	/**
+	 * Restores the game to the state it was in before the last move.
+	 */
 	public void undomove() {
 		for (Bowl b : bowls) {
 			b.restore();
@@ -145,9 +150,8 @@ public class Game implements Cloneable {
 	
 
 	/**
-	 * 
-	 * @param moves
-	 * @return
+	 * @param moves An array of moves.
+	 * @return A copy of game with the given moves applied to it.
 	 */
 	public Game moveSequence(int[] moves) {
 		Game game = clone();
@@ -187,14 +191,32 @@ public class Game implements Cloneable {
 	 */
 	private void updateBowles() {
 		int cp = getCurrentPlayerId();
+		
+		//for (int i=0; i<bowls.length; i++) {
+		//	Bowl b = bowls[i];
+		//	players[cp].addToScore(b.updateAndGetScore());
+		//}
+		
 		for (Bowl b : bowls) {
 			players[cp].addToScore(b.updateAndGetScore());
 		}
 	}
 	
+	/**
+	 * Tell each player object to store it's current score.
+	 */
 	private void storeScores() {
 		for (Player p : players) {
 			p.store();
+		}
+	}
+	
+	/**
+	 * Tell each bowl object to store it's current number of stones.
+	 */
+	private void storeStones() {
+		for (Bowl b : bowls) {
+			b.store();
 		}
 	}
 	

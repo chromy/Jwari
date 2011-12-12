@@ -1,7 +1,12 @@
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Random;
+
 import junit.framework.TestCase;
 
 
 public class GameTest extends TestCase {
+	private Random random;
 
 	public void testGame() {
 		Game g = new Game();
@@ -38,35 +43,47 @@ public class GameTest extends TestCase {
 
 	public void testAllValidMoves() {
 		Game g = new Game();
-		int[] validmoves1 = {0, 1, 2, 3, 4, 5, 6}; 
+		int[] validmoves1 = {0, 1, 2, 3, 4, 5};
+		int[] validmoves2 = {6, 7, 8, 9, 10, 11};
+		int[] validmoves3 = {0, 1, 2, 4, 5};
+		int[] validmoves4 = {6, 7, 8, 9, 10, 11};
+		int[] moves;
+		
+		moves = g.allValidMoves();
+		assertTrue(matchMoves(validmoves1, moves));
+		g.move(3);
+		moves = g.allValidMoves();
+		assertTrue(matchMoves(validmoves2, moves));
+		g.move(6);
+		moves = g.allValidMoves();
+		assertTrue(matchMoves(validmoves3, moves));
+		g.move(5);
+		moves = g.allValidMoves();
+		assertTrue(matchMoves(validmoves4, moves));
 	}
 
+	/**
+	 * @param a
+	 * @param b
+	 * @returns true iff every element in a is present in b.
+	 */
+	private boolean matchMoves(int[] a, int[] b) {
+		Arrays.sort(b);
+ 		for (int x : a) {
+			if (Arrays.binarySearch(b, x) < 0) {
+				return false;
+			}
+		}
+ 		return true;
+	}
+	
 	public void testIsValidMove() {
-		fail("Not yet implemented");
+		Game g = new Game();
+		assertTrue(!g.isValidMove(-1));
+		assertTrue(!g.isValidMove(100));
+		for (int i=0; i<12; i++) {
+			assertTrue(g.isValidMove(i));
+		}
+		
 	}
-
-	public void testCanCurrentPlayerMove() {
-		fail("Not yet implemented");
-	}
-
-	public void testMove() {
-		fail("Not yet implemented");
-	}
-
-	public void testMoveSequence() {
-		fail("Not yet implemented");
-	}
-
-	public void testAfterMove() {
-		fail("Not yet implemented");
-	}
-
-	public void testGetLeadingPlayer() {
-		fail("Not yet implemented");
-	}
-
-	public void testIsOver() {
-		fail("Not yet implemented");
-	}
-
 }

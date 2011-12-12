@@ -27,14 +27,12 @@ public class Owari {
 			assert (game.isValidMove(move)) : "Move not valid. Move was: " + move + " Player was: " + names[cp];
 			
 			game.move(move);
-			game.undomove();
-			game.move(move);
-			//game = game.afterMove(move);
 			System.out.println(names[cp] + " made the move: " + (move+1));
 			pressAnyKey();
 			
 		}
 		
+		// Draws can't happen. 
 		/*----------------------------------------------
 		/int p1score = game.players[0].getScore();
 		/int p2score = game.players[1].getScore();
@@ -64,7 +62,7 @@ public class Owari {
 				return new Human();
 			case 2:
 				System.out.println("You selected RandomAI.");
-				return new RandomAI(new Random(1));
+				return new RandomAI();
 			case 3:
 				System.out.println("You selected LookAheadOneAI.");
 				return new LookOneAI();
@@ -84,7 +82,7 @@ public class Owari {
 	}
 	
 	public static void pressAnyKey() {
-		System.out.println("[Press any key.]");
+		System.out.println("[Press Enter.]");
 		try {
 			System.in.read();
 		} catch (IOException e) {
