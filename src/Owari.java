@@ -15,8 +15,9 @@ public class Owari {
 		
 		while (!game.isOver()) {
 			game.display();
+			
+			// If a player can't move the other player takes a turn.
 			int cp = game.getCurrentPlayerId();
-
 			if (!game.canCurrentPlayerMove()) {
 				System.out.println(names[cp] + " can't move so must pass.");
 				game.swapPlayers();
@@ -29,7 +30,6 @@ public class Owari {
 			game.move(move);
 			System.out.println(names[cp] + " made the move: " + (move+1));
 			pressAnyKey();
-			
 		}
 		
 		// Draws can't happen. 

@@ -24,7 +24,7 @@ public class HexAI extends Mover {
 	private static final int QWIN      =  1000;
 	private static final int QLOSS     = -1000;
 	// Time for each move (in ms).
-	private final long timeBudget = 20*1000;
+	private final long timeBudget = 10*1000;
 	// True iff we've proved we can force a win.
 	private boolean forcewin = false;
 	
@@ -42,7 +42,7 @@ public class HexAI extends Mover {
 		playerId = game.getCurrentPlayerId();
 		int opponentMoveGuess = PVTri[0][1];
 		int depthReachedLastTurn = depthReached;
-		PVTri[0] = Arrays.copyOfRange(PVTri[0], 2, maxDepth);
+		//PVTri[0] = Arrays.copyOfRange(PVTri[0], 2, maxDepth);
 		long finishTime = System.currentTimeMillis() + timeBudget;
 		clearStats(); 
 		int score = 0;
@@ -50,11 +50,7 @@ public class HexAI extends Mover {
 		
 		if (!forcewin) {
 			long t3 = System.currentTimeMillis();
-			if (opponentMoveGuess == opponentMove) {
-				score = IDalphabeta(game, PVTri, Math.max(depthReachedLastTurn-2, 0), finishTime);
-			} else {
-				score = IDalphabeta(game, PVTri, 5, finishTime);
-			}
+			score = IDalphabeta(game, PVTri, 5, finishTime);
 			long t4 = System.currentTimeMillis();
 			PV = PVTri[0];
 			
@@ -98,6 +94,17 @@ public class HexAI extends Mover {
 //		System.out.println("---------------------------------");
 
 		//game.display();
+		if (!game.isValidMove(PV[0])) {
+			System.out.println("Error!");
+			for (int m : game.allValidMoves()) {
+				if (m >= 0) {
+					return m;
+				}
+			}
+		}
+		
+		
+		
 		System.out.println(Arrays.toString(PV));
 		assert (game.isValidMove(PV[0])) : "getMove returned an invalid move.";
 		Game afterPV = game.moveSequence(Arrays.copyOf(PV, Math.max(0, depthReached)));
@@ -183,7 +190,8 @@ public class HexAI extends Mover {
 			return score;
 		}
 		
-		int pmove = principleVar[0][depth];
+		int pmove = -1; // principleVar[0][depth];
+		/*
 		if (pmove >= 0 && game.isValidMove(pmove)) {
 			// Note to self: DON'T TOUCH
 			
@@ -207,7 +215,7 @@ public class HexAI extends Mover {
 				alpha = score;
 			}
 		}
-
+		*/
 		// Otherwise consider each move.
 		for (int move : game.allValidMoves()) {
 			if (move >= 0 && move != pmove) {
